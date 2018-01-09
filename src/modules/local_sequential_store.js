@@ -69,7 +69,7 @@ export default class LocalSequentialStore extends StatefulClass {
         this.state.buffer = [];
     }
 
-    destroy() {
+    async destroy() {
         if (this.state.buffer.length) this._outputFile();
         super.destroy();
     }

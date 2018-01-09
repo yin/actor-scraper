@@ -17,6 +17,7 @@ import { EVENT_VALUE } from './modules/stateful_class';
 import PseudoUrl from './modules/pseudo_url';
 import LocalPageQueue, { STATE_KEY as PAGE_QUEUE_STATE_KEY } from './modules/local_page_queue';
 import LocalSequentialStore, { STATE_KEY as SEQ_STORE_STATE_KEY } from './modules/local_sequential_store';
+import RemoteSequentialStore from './modules/remote_sequential_store';
 import UrlList, { STATE_KEY as URL_LIST_STATE_KEY } from './modules/url_list';
 
 const { APIFY_ACT_ID, APIFY_ACT_RUN_ID, NODE_ENV } = process.env;
@@ -75,9 +76,11 @@ const fetchInput = async () => {
 
 const createSeqStore = async (input) => {
     const state = await getValueOrUndefined(SEQ_STORE_STATE_KEY);
-    const sequentialStore = new LocalSequentialStore(state, input);
+    const sequentialStore = NODE_ENV === 'production'
+        ? new RemoteSequentialStore()
+        : new LocalSequentialStore(state, input);
 
-    sequentialStore.on(EVENT_VALUE, setValue);
+    if (NODE_ENV !== 'production') sequentialStore.on(EVENT_VALUE, setValue);
 
     return sequentialStore;
 };
@@ -253,7 +256,7 @@ Apify.main(async () => {
 
     // Cleanup resources - intervals, etc ...
     await crawler.destroy();
-    sequentialStore.destroy();
+    await sequentialStore.destroy();
     pageQueue.destroy();
     pool.destroy();
     if (urlList) urlList.destroy();
