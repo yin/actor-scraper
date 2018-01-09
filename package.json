@@ -15,7 +15,7 @@
     "url": "@TODO"
   },
   "dependencies": {
-    "apify": "^0.4.36",
+    "apify": "^0.4.39",
     "apify-client": "^0.1.59",
     "babel-polyfill": "^6.26.0",
     "bluebird": "^3.5.1",
