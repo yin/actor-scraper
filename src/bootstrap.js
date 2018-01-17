@@ -18,6 +18,7 @@ import PseudoUrl from './modules/pseudo_url';
 import LocalPageQueue, { STATE_KEY as PAGE_QUEUE_STATE_KEY } from './modules/local_page_queue';
 import LocalSequentialStore, { STATE_KEY as SEQ_STORE_STATE_KEY } from './modules/local_sequential_store';
 import RemoteSequentialStore from './modules/remote_sequential_store';
+import PuppeteerPool from './modules/puppeteer_pool';
 import UrlList, { STATE_KEY as URL_LIST_STATE_KEY } from './modules/url_list';
 
 const { APIFY_ACT_ID, APIFY_ACT_RUN_ID, NODE_ENV } = process.env;
@@ -69,7 +70,7 @@ const fetchInput = async () => {
         mergedInput.customProxies = mergedInput.customProxies.split('\n');
     }
 
-    logInfo(`Merged input: ${JSON.stringify(mergedInput, null, 2)}`);
+    logInfo(`Merged input: ${JSON.stringify(_.omit(mergedInput, 'urlListArr'), null, 2)}`);
 
     return mergedInput;
 };
@@ -94,12 +95,8 @@ const createPageQueue = async (input) => {
     return pageQueue;
 };
 
-const createCrawler = async (input) => {
-    return new Crawler(input);
-};
-
 const maybeCreateUrlList = async (input) => {
-    if (!input.urlList) return;
+    if (!input.urlList && !input.urlListArr) return;
 
     const state = await getValueOrUndefined(URL_LIST_STATE_KEY);
     const urlList = new UrlList(state, input);
@@ -132,7 +129,7 @@ const enqueueStartUrls = (input, pageQueue) => {
 // since the last call os if it's under 30s then we are OK.
 const eventLoopInfoInterval = setInterval(() => {
     logInfo(`Event loop stats: ${JSON.stringify(eventLoopStats.sense())}`);
-}, 30 * 1000);
+}, 60 * 1000);
 
 // This prints memory usage of all processes every 30s.
 const memoryInfoInterval = setInterval(() => {
@@ -143,7 +140,7 @@ const memoryInfoInterval = setInterval(() => {
         if (err || stdErr) logError('Cannot get memory', err || stdErr);
         logInfo(`Memory: ${stdOut}`);
     });
-}, 30 * 1000);
+}, 120 * 1000);
 
 /**
  * This is the main function that runs just once and then act gets finished.
@@ -153,7 +150,8 @@ Apify.main(async () => {
 
     const sequentialStore = await createSeqStore(input);
     const pageQueue = await createPageQueue(input);
-    const crawler = await createCrawler(input);
+    const puppeteerPool = new PuppeteerPool(input);
+    const crawler = new Crawler(input, puppeteerPool);
     const urlList = await maybeCreateUrlList(input);
 
     enqueueStartUrls(input, pageQueue);
@@ -256,9 +254,10 @@ Apify.main(async () => {
 
     // Cleanup resources - intervals, etc ...
     await crawler.destroy();
+    await puppeteerPool.destroy();
     await sequentialStore.destroy();
-    pageQueue.destroy();
-    pool.destroy();
+    await pageQueue.destroy();
+    await pool.destroy();
     if (urlList) urlList.destroy();
     clearInterval(eventLoopInfoInterval);
     clearInterval(memoryInfoInterval);
@@ -270,4 +269,4 @@ Apify.main(async () => {
 
 // @TODO: remove - this is attempt to test memory leak
 // TMP test - trying to kill process every 2h
-// setTimeout(() => process.exit(1), 2 * 60 * 60 * 1000);
+setTimeout(() => process.exit(1), 1.5 * 60 * 60 * 1000);
