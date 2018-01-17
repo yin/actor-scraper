@@ -16,7 +16,7 @@ export default class RemoteSequentialStore {
             .pushRecord(record)
             .then(() => {
                 delete this.pendingPromises[uuid];
-            }, () => {
+            }, (err) => {
                 logError('Apify.pushRecord() failed.', err);
                 delete this.pendingPromises[uuid];
             });
