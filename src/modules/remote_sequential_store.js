@@ -13,11 +13,11 @@ export default class RemoteSequentialStore {
         const uuid = uuidv4();
 
         this.pendingPromises[uuid] = Apify
-            .pushRecord(record)
+            .pushData(record)
             .then(() => {
                 delete this.pendingPromises[uuid];
             }, (err) => {
-                logError('Apify.pushRecord() failed.', err);
+                logError('Apify.pushData() failed.', err);
                 delete this.pendingPromises[uuid];
             });
     }
