@@ -1,6 +1,6 @@
-# Act Crawler
+# Actor Crawler
 
-[Apify **act**](https://www.apify.com/docs/actor) compatible with [Apify **crawler**](https://www.apify.com/docs/crawler) - same input  ⟹ same output.
+[Apify **actor**](https://www.apify.com/docs/actor) compatible with [Apify **crawler**](https://www.apify.com/docs/crawler) - same input  ⟹ same output.
 
 **WARNING:** This is an early version and **may contain some bugs** and may not be fully compatible with crawler product.
 
@@ -8,9 +8,9 @@
 
 ## Usage
 
-There are two ways how to use this act:
+There are two ways to use this actor:
 
-* pass crawler configuration as input of this act. Int his case the input looks like: 
+* pass crawler configuration as input of this actor. In this case the input looks like: 
 
   ```json
   {
@@ -22,7 +22,7 @@ There are two ways how to use this act:
   }
   ```
 
-* pass **ID** of own **crawler** and act fetches the configuration from that crawler. You can override any attribute you want in the act input: 
+* pass **ID** of own **crawler** and the actor fetches the configuration from that crawler. You can override any attribute you want in the actor input: 
 
   ```json
   {
@@ -31,13 +31,13 @@ There are two ways how to use this act:
   }
   ```
 
-This acts persists it's state in key-value store during the run and finally stores the results in files `RESULTS-1.json`, `RESULTS-2.json`, `RESULTS-3.json`,  … .
+This actor persists its state in key-value store during the run and finally stores the results in files `RESULTS-1.json`, `RESULTS-2.json`, `RESULTS-3.json`,  … .
 
 ## Input attributes
 
 #### Crawler compatible attributes
 
-Act supports following crawler configuration attributes (for documentation see https://www.apify.com/docs/crawler#home):
+The actor supports the following crawler configuration attributes (for documentation see https://www.apify.com/docs/crawler#home):
 
 | Attribute                 | Type                             | Default | Required | Description                              |
 | ------------------------- | -------------------------------- | ------- | -------- | ---------------------------------------- |
@@ -73,13 +73,13 @@ Act supports following crawler configuration attributes (for documentation see h
 | urlListRegExp         | `String` |         |          | RegExp to match array of urls from `urlList` file ^.<br /><br />This RegExp is used this way against the file and must return array of url strings: `contentOfFile.match(new RegExp(urlListRegExp, 'g'));`<br /><br />For example `(http|https)://[\\w-]+(\\.[\\w-]+)+([\\w-.,@?^=%&:/~+#-]*[\\w@?^=%&;/~+#-])?` to simply match any http/https urls. |
 | userAgent             | `String`   |         |          | User agent to be used in browser |
 | customProxies         | `[String]` |         |          | Array of proxies to be used for browsing. |
-| dumpio                | `Boolean`  | true    |          | If `true` then Chrome console log will be piped into act run log. |
+| dumpio                | `Boolean`  | true    |          | If `true` then Chrome console log will be piped into actor run log. |
 | saveSimplifiedResults | `Boolean`  | false   |          | If `true` then also simplified version of results will be outputted. |
-| fullStackTrace        | `Boolean`  | false   |          | If `true` then `request.errorInfo` and act log will contain full stack trace of each error. |
+| fullStackTrace        | `Boolean`  | false   |          | If `true` then `request.errorInfo` and actor log will contain full stack trace of each error. |
 
 ## Local usage
 
-To run act locally you must have [**NodeJS**](https://nodejs.org/en/) installed:
+To run the actor locally you must have [**NodeJS**](https://nodejs.org/en/) installed:
 
 * Clone this repository: `git clone https://github.com/apifytech/act-crawler.git`
 * Install dependencies: `npm install`
